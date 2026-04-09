@@ -76,6 +76,9 @@
             button6 = new Button();
             button5 = new Button();
             checkBox2 = new CheckBox();
+            lblPlaybackStatus = new Label();
+            btnLoadPlayback = new Button();
+            btnStartStopPlayback = new Button();
             groupBox1.SuspendLayout();
             SuspendLayout();
             // 
@@ -83,7 +86,7 @@
             // 
             button1.BackColor = Color.FromArgb(64, 64, 64);
             button1.ForeColor = Color.Lime;
-            button1.Location = new Point(850, 981);
+            button1.Location = new Point(852, 1090);
             button1.Name = "button1";
             button1.Size = new Size(136, 44);
             button1.TabIndex = 0;
@@ -96,7 +99,7 @@
             textBox1.BackColor = Color.FromArgb(64, 64, 64);
             textBox1.Font = new Font("Segoe UI", 11F);
             textBox1.ForeColor = Color.Lime;
-            textBox1.Location = new Point(11, 984);
+            textBox1.Location = new Point(13, 1093);
             textBox1.Name = "textBox1";
             textBox1.Size = new Size(827, 37);
             textBox1.TabIndex = 1;
@@ -105,7 +108,7 @@
             // 
             button2.BackColor = Color.FromArgb(64, 64, 64);
             button2.ForeColor = Color.Lime;
-            button2.Location = new Point(888, 344);
+            button2.Location = new Point(890, 453);
             button2.Name = "button2";
             button2.Size = new Size(98, 42);
             button2.TabIndex = 3;
@@ -173,7 +176,7 @@
             // 
             label2.AutoSize = true;
             label2.ForeColor = Color.Lime;
-            label2.Location = new Point(12, 353);
+            label2.Location = new Point(14, 462);
             label2.Name = "label2";
             label2.Size = new Size(46, 25);
             label2.TabIndex = 9;
@@ -183,7 +186,7 @@
             // 
             _log.BackColor = Color.Black;
             _log.ForeColor = Color.Green;
-            _log.Location = new Point(10, 395);
+            _log.Location = new Point(12, 504);
             _log.Name = "_log";
             _log.Size = new Size(976, 580);
             _log.TabIndex = 10;
@@ -412,9 +415,9 @@
             by1.AutoSize = true;
             by1.Location = new Point(678, 90);
             by1.Name = "by1";
-            by1.Size = new Size(105, 29);
+            by1.Size = new Size(100, 29);
             by1.TabIndex = 32;
-            by1.Text = "reserved";
+            by1.Text = "Driver 1";
             by1.UseVisualStyleBackColor = true;
             by1.CheckedChanged += by1_CheckedChanged;
             // 
@@ -627,12 +630,49 @@
             checkBox2.UseVisualStyleBackColor = true;
             checkBox2.CheckedChanged += checkBox2_CheckedChanged;
             // 
+            // lblPlaybackStatus
+            // 
+            lblPlaybackStatus.AutoSize = true;
+            lblPlaybackStatus.ForeColor = Color.Lime;
+            lblPlaybackStatus.Location = new Point(18, 346);
+            lblPlaybackStatus.Name = "lblPlaybackStatus";
+            lblPlaybackStatus.Size = new Size(196, 25);
+            lblPlaybackStatus.TabIndex = 15;
+            lblPlaybackStatus.Text = "Load a file for playback";
+            // 
+            // btnLoadPlayback
+            // 
+            btnLoadPlayback.BackColor = Color.FromArgb(64, 64, 64);
+            btnLoadPlayback.ForeColor = Color.Lime;
+            btnLoadPlayback.Location = new Point(18, 383);
+            btnLoadPlayback.Name = "btnLoadPlayback";
+            btnLoadPlayback.Size = new Size(112, 34);
+            btnLoadPlayback.TabIndex = 16;
+            btnLoadPlayback.Text = "Load";
+            btnLoadPlayback.UseVisualStyleBackColor = false;
+            btnLoadPlayback.Click += btnLoadPlayback_Click;
+            // 
+            // btnStartStopPlayback
+            // 
+            btnStartStopPlayback.BackColor = Color.FromArgb(64, 64, 64);
+            btnStartStopPlayback.ForeColor = Color.Lime;
+            btnStartStopPlayback.Location = new Point(150, 383);
+            btnStartStopPlayback.Name = "btnStartStopPlayback";
+            btnStartStopPlayback.Size = new Size(112, 34);
+            btnStartStopPlayback.TabIndex = 17;
+            btnStartStopPlayback.Text = "Start";
+            btnStartStopPlayback.UseVisualStyleBackColor = false;
+            btnStartStopPlayback.Click += btnStartStopPlayback_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(32, 36, 36);
-            ClientSize = new Size(992, 1034);
+            ClientSize = new Size(992, 1143);
+            Controls.Add(btnStartStopPlayback);
+            Controls.Add(btnLoadPlayback);
+            Controls.Add(lblPlaybackStatus);
             Controls.Add(checkBox2);
             Controls.Add(groupBox1);
             Controls.Add(_log);
@@ -704,5 +744,8 @@
         private Button button16;
         private Label label10;
         private TextBox textBox7;
+        private Label lblPlaybackStatus;
+        private Button btnLoadPlayback;
+        private Button btnStartStopPlayback;
     }
 }

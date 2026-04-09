@@ -9,6 +9,10 @@ namespace BridgePro
         private bool _querying = false;
         private readonly SerialManager _serial = new SerialManager();
         private CheckBox[] boxes;
+        // ---- Playback state ----------------------------------------
+        private List<(byte[] Data, int DelayMs)> _playbackFrames = new List<(byte[], int)>();
+        private CancellationTokenSource _playbackCts = null;
+        private bool _playbackRunning = false;
         public Form1()
         {
             InitializeComponent();
@@ -101,7 +105,7 @@ namespace BridgePro
                     button4.Text = "Disconnect";
                     comboBox1.Enabled = false;
                     button3.Enabled = false;
-                    byte[] frame = ProtocolHelper.BuildFrame(0x49,null);
+                    byte[] frame = ProtocolHelper.BuildFrame(0x49, null);
                     _serial.SendFrame(frame);
                 }
             }
@@ -531,6 +535,141 @@ namespace BridgePro
 
             button1_Click(sender, e);
         }
-    }
+        // ---- Playback ----------------------------------------------
 
+        private void btnLoadPlayback_Click(object sender, EventArgs e)
+        {
+            using var dlg = new OpenFileDialog
+            {
+                Title = "Load Playback File",
+                Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*",
+                RestoreDirectory = true
+            };
+
+            if (dlg.ShowDialog() != DialogResult.OK) return;
+
+            var frames = new List<(byte[] Data, int DelayMs)>();
+            int lineNum = 0;
+            int skipped = 0;
+            int currentDelay = 500; // default delay between frames
+
+            foreach (string raw in File.ReadLines(dlg.FileName))
+            {
+                lineNum++;
+                string line = raw.Trim();
+
+                // Skip blank lines and comment lines (# or //)
+                if (string.IsNullOrEmpty(line) || line.StartsWith("#") || line.StartsWith("//"))
+                    continue;
+
+                // Delay directive: *XXXX sets the delay (ms) for all subsequent frames
+                if (line.StartsWith("*"))
+                {
+                    string msPart = line.Substring(1).Trim();
+                    if (int.TryParse(msPart, out int ms) && ms >= 0)
+                    {
+                        currentDelay = ms;
+                        AppendLog($"Playback: line {lineNum} — delay set to {ms} ms", Color.DimGray);
+                    }
+                    else
+                    {
+                        AppendLog($"Playback: line {lineNum} invalid delay directive \"{line}\" — ignored.", Color.Orange);
+                    }
+                    continue;
+                }
+
+                byte[] parsed = ProtocolHelper.ParseHexString(line);
+                if (parsed == null || parsed.Length == 0)
+                {
+                    AppendLog($"Playback: line {lineNum} skipped (bad hex): \"{line}\"", Color.Orange);
+                    skipped++;
+                    continue;
+                }
+
+                if (parsed.Length > 11)
+                {
+                    AppendLog($"Playback: line {lineNum} skipped (>11 bytes): \"{line}\"", Color.Orange);
+                    skipped++;
+                    continue;
+                }
+
+                frames.Add((parsed, currentDelay));
+            }
+
+            _playbackFrames = frames;
+            string fname = Path.GetFileName(dlg.FileName);
+            lblPlaybackStatus.Text = $"{fname}  ({frames.Count} frames{(skipped > 0 ? $", {skipped} skipped" : "")})";
+            btnStartStopPlayback.Enabled = frames.Count > 0;
+            AppendLog($"Playback file loaded: {fname} — {frames.Count} frame(s) ready.", Color.CornflowerBlue);
+        }
+
+        private async void btnStartStopPlayback_Click(object sender, EventArgs e)
+        {
+            if (_playbackRunning)
+            {
+                _playbackCts?.Cancel();
+                return;
+            }
+
+            if (_playbackFrames.Count == 0)
+            {
+                AppendLog("No playback file loaded.", Color.Orange);
+                return;
+            }
+
+            if (!_serial.IsConnected)
+            {
+                AppendLog("Not connected — cannot start playback.", Color.Orange);
+                return;
+            }
+
+            await RunPlaybackAsync();
+        }
+
+        private async Task RunPlaybackAsync()
+        {
+            _playbackRunning = true;
+            _playbackCts = new CancellationTokenSource();
+            btnStartStopPlayback.Text = "Stop";
+            btnStartStopPlayback.ForeColor = Color.OrangeRed;
+            btnLoadPlayback.Enabled = false;
+
+            int total = _playbackFrames.Count;
+            AppendLog($"Playback started — {total} frame(s).", Color.CornflowerBlue);
+
+            try
+            {
+                for (int i = 0; i < total; i++)
+                {
+                    _playbackCts.Token.ThrowIfCancellationRequested();
+
+                    var (j1850Data, delayMs) = _playbackFrames[i];
+                    byte[] frame = ProtocolHelper.BuildSendFrame(j1850Data);
+
+                    AppendLog($"[{i + 1}/{total}] Playback TX: {ProtocolHelper.ToHexString(j1850Data)}  (+{delayMs} ms)", Color.LightGreen);
+                    _serial.SendFrame(frame);
+
+                    if (i < total - 1 && delayMs > 0)
+                        await Task.Delay(delayMs, _playbackCts.Token);
+                }
+
+                AppendLog("Playback complete.", Color.CornflowerBlue);
+            }
+            catch (OperationCanceledException)
+            {
+                AppendLog("Playback stopped by user.", Color.Orange);
+            }
+            finally
+            {
+                _playbackRunning = false;
+                _playbackCts?.Dispose();
+                _playbackCts = null;
+                btnStartStopPlayback.Text = "▶  Play";
+                btnStartStopPlayback.ForeColor = Color.Lime;
+                btnLoadPlayback.Enabled = true;
+            }
+        }
+
+
+    }
 }
