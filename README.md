@@ -16,3 +16,7 @@ SCH and Gerbers are available in the HW subfolder
 
 ## Firmware 
 It's in its own repo https://github.com/garnerm91/J1850VPW_USB
+
+
+## REv A video
+[![Rev A video](https://img.youtube.com/vi/8Q_QOkDVAA0/0.jpg)](https://youtu.be/8Q_QOkDVAA0)
