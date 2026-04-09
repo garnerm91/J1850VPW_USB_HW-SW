@@ -3,6 +3,13 @@ Contains the hardware and software to go with the J1850VPW_USB repo
 
 ## Software
 C# project built in Visual Studio. Located in the SW subfolder
+"Bridge Pro" allows you to send and receive J1850VPW frames. It also allows for a scripted playback
+This program supports all the commands for the 99-02 swap box if you have one and need to configure it. I really wrote this tool as a tool for configuring that but also added a few features.
+
+Scripted playback
+"#" and"//" are ignored
+"*XXXX" sets the delay in mS where *100 would be a 100ms delay between frames.
+Do not include the CRC its already calculated by the module.
 
 ## Hardware
 SCH and Gerbers are available in the HW subfolder
