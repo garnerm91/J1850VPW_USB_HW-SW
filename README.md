@@ -1,5 +1,6 @@
 # J1850VPW_USB_HW-SW
 Contains the hardware and software to go with the J1850VPW_USB repo
+Note: if your module is not showing up as a serial port, you need to install the CH340 driver.
 
 ## Software
 C# project built in Visual Studio. Located in the SW subfolder
